@@ -10,11 +10,12 @@ import static com.craftinginterpreters.lox.TokenType.*;
 public class Scanner {
   private final String source;
   private final List<Token> tokens = new ArrayList<>();
+
   private int start = 0;
-  private int current =0;
+  private int current = 0;
   private int line = 1;
 
-  Scanner (String source) {
+  Scanner(String source) {
     this.source = source;
   }
 
@@ -24,25 +25,8 @@ public class Scanner {
       scanToken();
     }
 
-    token.add(new Token(EOF, "", null, line));
+    tokens.add(new Token(EOF, "", null, line));
     return tokens;
-  }
-
-  private boolean isAtEnd() {
-    return current >= source.length();
-  }
-
-  private void addToken(TokenType type) {
-    addToken(type, null);
-  }
-
-  private void addToken(TokenType type, Object literal) {
-    String text = source.substring(start, current);
-    tokens.add(new Token(type, text, literal, line));
-  }
-
-  private char advance() {
-    addToken(type, null);
   }
 
   private void scanToken() {
@@ -67,27 +51,29 @@ public class Scanner {
       case '<': 
         addToken(match('=') ? LESS_EQUAL : LESS); 
         break;
-      case '>': 
-        addToken(match('=') ? GREATER_EQUAL : GREATER); 
+      case '>':
+        addToken(match('=') ? GREATER_EQUAL : GREATER);
         break;
       case '/':
         if (match('/')) {
+          // A comment goes until the end of the line.
           while (peek() != '\n' && !isAtEnd()) advance();
         } else {
           addToken(SLASH);
         }
         break;
-      
+
       case ' ':
       case '\r':
       case '\t':
+        // Ignore whitespace.
         break;
-
-      case '"': string(); break;
 
       case '\n':
         line++;
         break;
+
+      case '"': string(); break;
 
       default:
         if (isDigit(c)) {
@@ -106,7 +92,7 @@ public class Scanner {
     }
 
     if (isAtEnd()) {
-      lox.error(line, "Unterminated string.");
+      Lox.error(line, "Unterminated string.");
       return;
     }
 
@@ -116,24 +102,11 @@ public class Scanner {
     addToken(STRING, value);
   }
 
-  private void number() {
-    while (isDigit(peek())) advance();
-
-    if (peek() == '.' && isDigit(peekNext())) {
-      advance();
-
-      while (isDigit(peek())) advance();
-    }
-
-    addToken(NUMBER,
-      Double.parseDouble(source.substring(start, current)));
-  }
-
   private boolean match(char expected) {
     if (isAtEnd()) return false;
     if (source.charAt(current) != expected) return false;
 
-    current ++;
+    current++;
     return true;
   }
 
@@ -142,12 +115,24 @@ public class Scanner {
     return source.charAt(current);
   }
 
-  private char peekNext() {
-    if (current + 1 >= source.length()) return '\0';
-    return source.charAt(current + 1);
-  }
-
   private boolean isDigit(char c) {
     return c >= '0' && c <= '9';
+  }
+
+  private boolean isAtEnd() {
+    return current >= source.length();
+  }
+
+  private char advance() {
+    return source.charAt(current++);
+  }
+
+  private void addToken(TokenType type) {
+    addToken(type, null);
+  }
+
+  private void addToken(TokenType type, Object literal) {
+    String text = source.substring(start, current);
+    tokens.add(new Token(type, text, literal, line));
   }
 }
