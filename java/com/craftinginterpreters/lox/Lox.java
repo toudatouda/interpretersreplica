@@ -10,6 +10,10 @@ import java.util.List;
 
 public class Lox {
   static boolean hadError = false;
+  // main function, reading command line arguments
+  // if more than one throw error
+  // if one run file
+  // if none run prompt
   public static void main(String[] args) throws IOException {
     if (args.length > 1) {
       System.out.println("Usage: jlox [script]");
@@ -60,6 +64,4 @@ public class Lox {
         "[line " + line + "] Error" + where + ": " + message);
         hadError = true;
   }
-
-
 }
